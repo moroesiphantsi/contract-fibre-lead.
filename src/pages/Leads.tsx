@@ -24,6 +24,7 @@ import {
   remove,
   update,
 } from "firebase/database";
+
 import { MenuItem } from "@mui/material";
 
 import { db } from "../firebase";
@@ -32,11 +33,13 @@ import StatsCards from "../components/StatsCards";
 import ExportExcel from "../components/ExportExcel";
 import AgentAssign from "../components/AgentAssign";
 
-
-
 const Leads = () => {
   const [leads, setLeads] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+
+  const [selectedMonth, setSelectedMonth] = useState(
+    new Date().getMonth()
+  );
 
   useEffect(() => {
     const leadRef = ref(db, "fibreLeads");
@@ -61,42 +64,41 @@ const Leads = () => {
     remove(ref(db, `fibreLeads/${id}`));
   };
 
-  const [selectedMonth,setSelectedMonth] = useState(
-  new Date().getMonth()
-);
-
   const updateStatus = (id: string, status: string) => {
     update(ref(db, `fibreLeads/${id}`), { status });
   };
 
-  const monthlyLeads = leads.filter((lead)=>{
+  // ✅ FILTER BY MONTH FIRST (IMPORTANT)
+  const monthlyLeads = leads.filter((lead) => {
+    if (!lead.createdAt) return false;
 
-  if(!lead.createdAt) return false;
+    const date = new Date(lead.createdAt);
 
-  const date = new Date(lead.createdAt);
+    return date.getMonth() === selectedMonth;
+  });
 
-  return date.getMonth() === selectedMonth;
-
-});
-
-  const filteredLeads = leads.filter((lead) =>
+  // ✅ SEARCH ONLY INSIDE SELECTED MONTH
+  const filteredMonthlyLeads = monthlyLeads.filter((lead) =>
     `${lead.name} ${lead.surname} ${lead.email} ${lead.address} ${lead.contact}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
 
+  const months = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
 
   return (
     <Box sx={{ bgcolor: "#0f172a", minHeight: "100vh", py: 4 }}>
       <Container maxWidth="xl">
 
-
         {/* 📊 STATS */}
         <StatsCards leads={monthlyLeads} />
 
-        {/* 📤 EXPORT BUTTON */}
+        {/* 📤 EXPORT */}
         <Box sx={{ mt: 2 }}>
-          <ExportExcel leads={filteredLeads} />
+          <ExportExcel leads={monthlyLeads} />
         </Box>
 
         {/* HEADER */}
@@ -115,221 +117,165 @@ const Leads = () => {
           />
         </Paper>
 
+        {/* MONTH SELECTOR */}
         <Paper
-sx={{
-p:2,
-mt:2,
-display:"flex",
-alignItems:"center",
-gap:2
-}}
->
+          sx={{
+            p: 2,
+            mt: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <Typography>Monthly Leads:</Typography>
 
-<Typography>
-Monthly Leads:
-</Typography>
+          <TextField
+            select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+          >
+            {months.map((month, index) => (
+              <MenuItem key={index} value={index}>
+                {month}
+              </MenuItem>
+            ))}
+          </TextField>
 
+          <Typography fontWeight="bold">
+            Total: {filteredMonthlyLeads.length}
+          </Typography>
+        </Paper>
 
-<TextField
-select
-value={selectedMonth}
-onChange={(e)=>setSelectedMonth(Number(e.target.value))}
->
-
-{[
-"January",
-"February",
-"March",
-"April",
-"May",
-"June",
-"July",
-"August",
-"September",
-"October",
-"November",
-"December"
-
-].map((month,index)=>(
-
-<MenuItem key={month} value={index}>
-{month}
-</MenuItem>
-
-))}
-
-</TextField>
-
-
-<Typography fontWeight="bold">
-Total: {monthlyLeads.length}
-</Typography>
-
-
-</Paper>
-
-        {/* LEADS GRID */}
+        {/* GRID */}
         <Grid container spacing={3} sx={{ mt: 3 }}>
-          {filteredLeads.map((lead) => (
-            <Grid item xs={12} md={4} key={lead.id}>
-              <Paper sx={cardStyle}>
 
-                <Typography fontWeight="bold" fontSize="18px">
-                  {lead.name} {lead.surname}
-                </Typography>
+          {/* ✅ NO LEADS MESSAGE */}
+          {filteredMonthlyLeads.length === 0 ? (
+            <Box sx={{ width: "100%", textAlign: "center", mt: 5 }}>
+              <Typography color="white" fontWeight="bold">
+                No fibre applications received for {months[selectedMonth]}.
+              </Typography>
+            </Box>
+          ) : (
+            filteredMonthlyLeads.map((lead) => (
+              <Grid item xs={12} md={4} key={lead.id}>
+                <Paper sx={cardStyle}>
 
-                <Typography>{lead.email}</Typography>
-                <Typography>{lead.address}</Typography>
-                <Typography>{lead.contact}</Typography>
+                  <Typography fontWeight="bold" fontSize="18px">
+                    {lead.name} {lead.surname}
+                  </Typography>
 
-                <Typography sx={{ mt: 1 }}>
-                  ID: {lead.idNumber || "N/A"}
-                </Typography>
+                  <Typography>{lead.email}</Typography>
+                  <Typography>{lead.address}</Typography>
+                  <Typography>{lead.contact}</Typography>
 
-                {/* PACKAGE PLAN */}
-<Chip
-  label={`📦 ${lead.packagePlan || "No Package"}`}
-  sx={{ mt: 1, mr: 1, bgcolor: "#4DA3FF", color: "white" }}
-/>
+                  <Typography sx={{ mt: 1 }}>
+                    ID: {lead.idNumber || "N/A"}
+                  </Typography>
 
-<Chip
-  label={`💰 ${lead.price || "N/A"}`}
-  sx={{ mt: 1, bgcolor: "#22c55e", color: "white" }}
-/>
-
-                {/* STATUS */}
-                <Chip
-                  label={lead.status || "New"}
-                  sx={{ mt: 1, bgcolor: "#4DA3FF", color: "white" }}
-                />
-
-                {/* AGENT ASSIGN */}
-                <Box sx={{ mt: 2 }}>
-                  <AgentAssign
-                    leadId={lead.id}
-                    current={lead.assignedAgent}
+                  <Chip
+                    label={`📦 ${lead.packagePlan || "No Package"}`}
+                    sx={{ mt: 1, mr: 1, bgcolor: "#4DA3FF", color: "white" }}
                   />
-                </Box>
 
-                {/* STATUS BUTTONS */}
-<Box sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap" }}>
+                  <Chip
+                    label={`💰 ${lead.price || "N/A"}`}
+                    sx={{ mt: 1, bgcolor: "#22c55e", color: "white" }}
+                  />
 
-  <Button
-    size="small"
-    variant="contained"
-    onClick={() => updateStatus(lead.id, "Received")}
-  >
-    Received
-  </Button>
+                  <Chip
+                    label={lead.status || "New"}
+                    sx={{ mt: 1, bgcolor: "#4DA3FF", color: "white" }}
+                  />
 
+                  {/* AGENT */}
+                  <Box sx={{ mt: 2 }}>
+                    <AgentAssign
+                      leadId={lead.id}
+                      current={lead.assignedAgent}
+                    />
+                  </Box>
 
-  <Button
-    size="small"
-    variant="contained"
-    onClick={() => updateStatus(lead.id, "In Process")}
-  >
-    In Process
-  </Button>
+                  {/* STATUS BUTTONS */}
+                  <Box sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap" }}>
 
+                    <Button size="small" variant="contained"
+                      onClick={() => updateStatus(lead.id, "Received")}
+                    >
+                      Received
+                    </Button>
 
-  <Button
-    size="small"
-    variant="contained"
-    onClick={() => updateStatus(lead.id, "Pending")}
-  >
-    Pending
-  </Button>
+                    <Button size="small" variant="contained"
+                      onClick={() => updateStatus(lead.id, "In Process")}
+                    >
+                      In Process
+                    </Button>
 
+                    <Button size="small" variant="contained"
+                      onClick={() => updateStatus(lead.id, "Pending")}
+                    >
+                      Pending
+                    </Button>
 
-  <Button
-    size="small"
-    variant="contained"
-    color="error"
-    onClick={() => updateStatus(lead.id, "Approved")}
-  >
-    Approved
-  </Button>
+                    <Button size="small" variant="contained" color="success"
+                      onClick={() => updateStatus(lead.id, "Approved")}
+                    >
+                      Approved
+                    </Button>
 
+                    <Button size="small" variant="contained" color="error"
+                      onClick={() => updateStatus(lead.id, "Declined")}
+                    >
+                      Declined
+                    </Button>
 
-  <Button
-    size="small"
-    variant="contained"
-    color="secondary"
-    onClick={() => updateStatus(lead.id, "Declined")}
-  >
-    Declined
-  </Button>
+                  </Box>
 
-</Box>
+                  {/* ACTIONS */}
+                  <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
 
+                    <IconButton
+                      onClick={() => {
+                        const phone = lead.contact?.replace(/\D/g, "");
+                        const message = `Hello ${lead.name},
 
-                {/* ACTION BUTTONS */}
-                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+Status: ${lead.status || "Received"}
+Package: ${lead.packagePlan || "N/A"}
+Price: ${lead.price || "N/A"}`;
 
-                  <IconButton
-  onClick={() => {
-    const phone = lead.contact?.replace(/\D/g, "");
+                        window.open(
+                          `https://wa.me/27${phone.startsWith("0") ? phone.substring(1) : phone}?text=${encodeURIComponent(message)}`,
+                          "_blank"
+                        );
+                      }}
+                      sx={{ color: "#25D366" }}
+                    >
+                      <WhatsApp />
+                    </IconButton>
 
-    const message = `Hello ${lead.name},
+                    <IconButton
+                      onClick={() =>
+                        window.open(`mailto:${lead.email}`)
+                      }
+                      sx={{ color: "#3b82f6" }}
+                    >
+                      <Email />
+                    </IconButton>
 
-Your Fibre Application Status: ${lead.status || "Received"}
+                    <IconButton
+                      onClick={() => deleteLead(lead.id)}
+                      sx={{ color: "#ef4444" }}
+                    >
+                      <Delete />
+                    </IconButton>
 
-Selected Package: ${lead.packagePlan || "N/A"}
-Price: ${lead.price || "N/A"}
+                  </Box>
 
-Thank you for choosing our fibre services.
+                </Paper>
+              </Grid>
+            ))
+          )}
 
-Kind Regards,
-Internet Fibre Team`;
-
-    window.open(
-      `https://wa.me/27${phone.startsWith("0") ? phone.substring(1) : phone}?text=${encodeURIComponent(message)}`,
-      "_blank"
-    );
-  }}
-  sx={{ color: "#25D366" }}
->
-  <WhatsApp />
-</IconButton>
-
-                  <IconButton
-  onClick={() => {
-    const subject = `Fibre Application Update - ${lead.status}`;
-
-    const body = `Hello ${lead.name},
-
-Your Fibre Application Status: ${lead.status || "New"}
-
-Selected Package: ${lead.packagePlan || "N/A"}
-Price: ${lead.price || "N/A"}
-
-Thank you for choosing Internet Fibre.
-
-Kind Regards,
-Internet Fibre Team`;
-
-    window.open(
-      `mailto:${lead.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    );
-  }}
-  sx={{ color: "#3b82f6" }}
->
-  <Email />
-</IconButton>
-
-
-                  <IconButton
-                    onClick={() => deleteLead(lead.id)}
-                    sx={{ color: "#ef4444" }}
-                  >
-                    <Delete />
-                  </IconButton>
-
-                </Box>
-
-              </Paper>
-            </Grid>
-          ))}
         </Grid>
 
       </Container>
@@ -339,7 +285,6 @@ Internet Fibre Team`;
 
 export default Leads;
 
-/* STYLES */
 const cardStyle = {
   p: 3,
   borderRadius: 3,
