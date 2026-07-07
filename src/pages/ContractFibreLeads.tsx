@@ -180,7 +180,7 @@ position:"relative",
 overflow:"hidden",
 
 background:
-"linear-gradient(135deg,#dbeafe,#f8fbff,#eef7ff)",
+"linear-gradient(135deg,#021B79 0%, #005CFF 35%, #00AEEF 70%, #8EE3FF 100%)",
 
 padding:"50px 20px"
 
@@ -205,25 +205,16 @@ zIndex:0
 },
 
 glass:{
-
 position:"relative",
-
 zIndex:5,
-
 maxWidth:1250,
-
 margin:"0 auto",
-
-borderRadius:"35px",
-
-background:"rgba(255,255,255,.95)",
-
-backdropFilter:"blur(30px)",
-
-boxShadow:"0 30px 80px rgba(0,0,0,.12)",
-
-padding:5
-
+borderRadius:"38px",
+background:"#ffffff",
+backdropFilter:"blur(25px)",
+boxShadow:"0 35px 90px rgba(0,0,0,.22)",
+padding:5,
+border:"1px solid rgba(255,255,255,.35)"
 },
 
 input:{
@@ -397,30 +388,24 @@ mb={6}
 <Grid item xs={12} md={8}>
 
 <MotionTypography
-
-variant="h3"
-
+variant="h2"
 fontWeight={900}
-
-color="#0f172a"
-
 animate={{
-
-x:[0,25,0]
-
+x:[0,18,0]
 }}
-
 transition={{
-
-duration:7,
-
+duration:6,
 repeat:Infinity
-
 }}
-
 >
 
-OpenServe Contract Fibre
+<span style={{color:"#005CFF"}}>Open</span>
+
+<span style={{color:"#0088FF"}}>Serve </span>
+
+<span style={{color:"#FFFFFF"}}>Contract </span>
+
+<span style={{color:"#00BFFF"}}>Fibre</span>
 
 </MotionTypography>
 
@@ -432,7 +417,7 @@ fontSize={20}
 
 lineHeight={1.9}
 
-color="#475569"
+color="rgba(255,255,255,.92)"
 
 animate={{
 
@@ -914,6 +899,70 @@ color:"#fff"
   />
 </Grid>
 
+</Grid>
+
+{/* ===========================
+        SUBMIT BUTTON
+=========================== */}
+
+<Grid item xs={12}>
+
+  <MotionBox
+
+    mt={5}
+
+    display="flex"
+
+    justifyContent="center"
+
+    animate={{
+      scale:[1,1.03,1]
+    }}
+
+    transition={{
+      duration:3,
+      repeat:Infinity
+    }}
+
+  >
+
+    <Button
+
+      size="large"
+
+      variant="contained"
+
+      endIcon={
+        loading
+        ?
+        <CircularProgress
+          size={24}
+          color="inherit"
+        />
+        :
+        <Send/>
+      }
+
+      disabled={loading}
+
+      sx={styles.submitButton}
+
+      onClick={submitApplication}
+
+    >
+
+      {loading
+      ?
+      "Submitting Application..."
+      :
+      "Submit Fibre Application"}
+
+    </Button>
+
+  </MotionBox>
+
+</Grid>
+
 {/* ===========================
         INFORMATION CARD
 =========================== */}
@@ -1045,70 +1094,6 @@ color:"#fff"
     </Grid>
 
   </MotionPaper>
-
-</Grid>
-
-{/* ===========================
-        SUBMIT BUTTON
-=========================== */}
-
-<Grid item xs={12}>
-
-  <MotionBox
-
-    mt={5}
-
-    display="flex"
-
-    justifyContent="center"
-
-    animate={{
-      scale:[1,1.03,1]
-    }}
-
-    transition={{
-      duration:3,
-      repeat:Infinity
-    }}
-
-  >
-
-    <Button
-
-      size="large"
-
-      variant="contained"
-
-      endIcon={
-        loading
-        ?
-        <CircularProgress
-          size={24}
-          color="inherit"
-        />
-        :
-        <Send/>
-      }
-
-      disabled={loading}
-
-      sx={styles.submitButton}
-
-      onClick={submitApplication}
-
-    >
-
-      {loading
-      ?
-      "Submitting Application..."
-      :
-      "Submit Fibre Application"}
-
-    </Button>
-
-  </MotionBox>
-
-</Grid>
 
 </Grid>
 
