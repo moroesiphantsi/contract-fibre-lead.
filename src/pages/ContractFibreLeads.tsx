@@ -1,1506 +1,1270 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+
 import {
   Box,
-  Grid,
   Paper,
+  Grid,
   Typography,
   TextField,
   Button,
   MenuItem,
-  Chip,
   Avatar,
+  CircularProgress,
+  Snackbar,
+  Alert,
   Divider,
   Stack,
-  Card,
-  CardContent,
-  InputAdornment
+  InputAdornment,
+  Chip
 } from "@mui/material";
 
 import {
-  BusinessCenter,
-  Wifi,
   Person,
   Phone,
   Email,
   Home,
-  LocationOn,
-  CheckCircle,
+  Badge,
+  Wifi,
+  Language,
+  Send,
+  Security,
   Bolt,
-  Public,
-  Router,
   RocketLaunch,
-  Verified,
-  WorkspacePremium,
-  ArrowForward,
-  Star,
-  TrendingUp,
-  SupportAgent,
-  Engineering,
-  Speed
+  Public,
+  Apartment,
+  Verified
 } from "@mui/icons-material";
 
 import { motion } from "framer-motion";
 
-import {
-  ref,
-  push,
-  onValue,
-  set,
-  serverTimestamp
-} from "firebase/database";
+import { ref, push } from "firebase/database";
 
 import { db } from "../firebase";
 
-const MotionBox = motion(Box);
 const MotionPaper = motion(Paper);
+const MotionBox = motion(Box);
 const MotionTypography = motion(Typography);
-
-
-
-const floating = {
-  animate: {
-    y: [0, -18, 0],
-    transition: {
-      duration: 6,
-      repeat: Infinity
-    }
-  }
-};
-
-const slideLeft = {
-  hidden: { opacity: 0, x: -120 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      duration: 1
-    }
-  }
-};
-
-const slideRight = {
-  hidden: { opacity: 0, x: 120 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      duration: 1
-    }
-  }
-};
-
-const fadeUp = {
-  hidden: {
-    opacity: 0,
-    y: 60
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: .8
-    }
-  }
-};
 
 const ContractFibreLeads = () => {
 
-const [agents, setAgents] = useState<any[]>([]); 
-useEffect(() => {
-  const agentsRef = ref(db, "agents");
+const [loading,setLoading]=useState(false);
 
-  onValue(agentsRef, (snapshot) => {
-    const data = snapshot.val();
+const [success,setSuccess]=useState(false);
 
-    if (data) {
-      setAgents(
-        Object.keys(data).map((key) => ({
-          id: key,
-          ...data[key],
-        }))
-      );
-    } else {
-      setAgents([]);
-    }
-  });
-}, []);
+const [form,setForm]=useState({
 
-const emptyLead = {
+firstName:"",
+lastName:"",
+phone:"",
+email:"",
+idNumber:"",
+address:"",
+suburb:"",
+city:"",
+province:"",
+postalCode:"",
+packageName:"",
+monthlyPrice:"",
+agentName:"",
+notes:"",
 
-customerName: "",
-surname: "",
-idNumber: "",
-phone: "",
-alternativePhone: "",
-email: "",
+createdAt:new Date().toISOString(),
 
-address: "",
-suburb: "",
-city: "",
-province: "",
+status:"Pending"
 
-gpsLocation: "",
+});
 
-packagePlan: "",
-saleType: "Contract",
+const packagePlans=[
 
-provider: "Openserve",
+{
+name:"Home Fibre 20 Mbps",
+price:"R399"
+},
 
-lineSpeed: "",
+{
+name:"Home Fibre 50 Mbps",
+price:"R599"
+},
 
-existingISP: "",
+{
+name:"Home Fibre 100 Mbps",
+price:"R799"
+},
 
-preferredInstallationDate: "",
+{
+name:"Home Fibre 200 Mbps",
+price:"R999"
+},
 
-preferredTime: "",
+{
+name:"Business Fibre 500 Mbps",
+price:"R1 499"
+},
 
-agentName: "",
+{
+name:"Business Fibre 1 Gbps",
+price:"R1 999"
+}
 
-notes: "",
+];
 
-status: "Pending",
+const handleChange=(e:any)=>{
 
-adminConfirmation: "Pending",
+const {name,value}=e.target;
 
-commission: 200,
+setForm(prev=>({
 
-createdAt: ""
+...prev,
+
+[name]:value
+
+}));
+
 };
 
-const [lead, setLead] = useState(emptyLead);
-
-const [loading, setLoading] = useState(false);
-
-const providers = [
-"Openserve",
-"MetroFibre",
-"Vumatel",
-"Frogfoot",
-"Link Africa"
-];
-
-const packages = [
-"20/10 Mbps",
-"40/20 Mbps",
-"50/25 Mbps",
-"100/50 Mbps",
-"200/100 Mbps",
-"500/250 Mbps",
-"1000/500 Mbps"
-];
-
-const provinces = [
-"Gauteng",
-"Limpopo",
-"Mpumalanga",
-"North West",
-"Free State",
-"KwaZulu-Natal",
-"Eastern Cape",
-"Western Cape",
-"Northern Cape"
-];
-
-return (
-
-<Box
-sx={{
-minHeight:"100vh",
-overflow:"hidden",
-background:`
-linear-gradient(
-135deg,
-#020617 0%,
-#071A38 20%,
-#0B2E59 45%,
-#004AAD 70%,
-#06B6D4 100%
-)`
-}}
->
-
-{/* =========================
-        FLOATING BACKGROUND
-========================= */}
-
-<MotionBox
-animate={{
-rotate:360
-}}
-transition={{
-repeat:Infinity,
-duration:80,
-ease:"linear"
-}}
-sx={{
-position:"fixed",
-top:-250,
-right:-250,
-width:600,
-height:600,
-borderRadius:"50%",
-background:"rgba(0,180,255,.12)",
-filter:"blur(80px)"
-}}
-/>
-
-<MotionBox
-animate={{
-rotate:-360
-}}
-transition={{
-repeat:Infinity,
-duration:70,
-ease:"linear"
-}}
-sx={{
-position:"fixed",
-bottom:-250,
-left:-250,
-width:650,
-height:650,
-borderRadius:"50%",
-background:"rgba(59,130,246,.14)",
-filter:"blur(90px)"
-}}
-/>
-
-<MotionBox
-animate={floating.animate}
-sx={{
-position:"fixed",
-top:"18%",
-left:"10%"
-}}
->
-
-<Wifi
-sx={{
-fontSize:120,
-color:"rgba(255,255,255,.06)"
-}}
-/>
-
-</MotionBox>
-
-<MotionBox
-animate={{
-y:[0,-20,0],
-rotate:[0,5,-5,0]
-}}
-transition={{
-repeat:Infinity,
-duration:7
-}}
-sx={{
-position:"fixed",
-right:"12%",
-top:"25%"
-}}
->
-
-<Router
-sx={{
-fontSize:110,
-color:"rgba(255,255,255,.05)"
-}}
-/>
-
-</MotionBox>
-
-<Box
-sx={{
-position:"relative",
-zIndex:2,
-px:{
-xs:3,
-md:8
-},
-py:8
-}}
->
-
-<Grid
-container
-spacing={6}
-alignItems="center"
->
-
-{/* LEFT */}
-
-<Grid item xs={12} md={7}>
-
-<MotionTypography
-variants={slideLeft}
-initial="hidden"
-animate="visible"
-variant="overline"
-sx={{
-color:"#38bdf8",
-fontSize:18,
-letterSpacing:4,
-fontWeight:700
-}}
->
-
-2026 OPENSERVE BUSINESS
-
-</MotionTypography>
-
-<MotionTypography
-variants={slideLeft}
-initial="hidden"
-animate="visible"
-variant="h2"
-fontWeight="bold"
-sx={{
-color:"white",
-lineHeight:1.1,
-mt:2
-}}
->
-
-Future Ready
-
-<Box
-component="span"
-sx={{
-display:"block",
-background:"linear-gradient(90deg,#38bdf8,#22d3ee,#ffffff)",
-WebkitBackgroundClip:"text",
-WebkitTextFillColor:"transparent"
-}}
->
-
-Contract Fibre
-
-</Box>
-
-Solutions
-
-</MotionTypography>
-
-<MotionTypography
-animate={{
-x:[0,20,-20,0]
-}}
-transition={{
-repeat:Infinity,
-duration:12
-}}
-sx={{
-mt:4,
-fontSize:20,
-color:"#cbd5e1",
-maxWidth:700,
-lineHeight:1.9
-}}
->
-
-Experience lightning-fast Openserve Fibre with dedicated business
-and residential contract packages.
-
-Enjoy premium connectivity, professional installations,
-priority support, smart Wi-Fi solutions,
-and nationwide coverage designed for 2026.
-
-</MotionTypography>
-
-<Stack
-direction="row"
-spacing={2}
-flexWrap="wrap"
-sx={{mt:5}}
->
-
-<Chip
-icon={<WorkspacePremium/>}
-label="Premium Fibre"
-/>
-
-<Chip
-icon={<RocketLaunch/>}
-label="Fast Installation"
-/>
-
-<Chip
-icon={<Verified/>}
-label="Verified Openserve"
-/>
-
-<Chip
-icon={<Bolt/>}
-label="Unlimited Internet"
-/>
-
-</Stack>
-
-<Stack
-direction="row"
-spacing={3}
-sx={{mt:6}}
->
-
-<Button
-variant="contained"
-size="large"
-endIcon={<ArrowForward/>}
-sx={{
-px:5,
-py:2,
-borderRadius:100,
-fontSize:17,
-fontWeight:"bold",
-background:
-"linear-gradient(90deg,#2563eb,#06b6d4)"
-}}
->
-
-Apply Now
-
-</Button>
-
-<Button
-variant="outlined"
-size="large"
-sx={{
-px:5,
-py:2,
-borderRadius:100,
-color:"white",
-borderColor:"rgba(255,255,255,.3)"
-}}
->
-
-Explore Packages
-
-</Button>
-
-</Stack>
-
-</Grid>
-
-{/* RIGHT */}
-
-<Grid item xs={12} md={5}>
-
-<MotionPaper
-variants={slideRight}
-initial="hidden"
-animate="visible"
-whileHover={{
-scale:1.02
-}}
-sx={{
-borderRadius:8,
-overflow:"hidden",
-background:"rgba(255,255,255,.08)",
-backdropFilter:"blur(25px)",
-border:"1px solid rgba(255,255,255,.15)",
-p:4
-}}
->
-
-<Avatar
-sx={{
-width:90,
-height:90,
-mx:"auto",
-background:
-"linear-gradient(135deg,#2563eb,#06b6d4)"
-}}
->
-
-<BusinessCenter sx={{fontSize:50}}/>
-
-</Avatar>
-
-<Typography
-textAlign="center"
-mt={3}
-variant="h5"
-fontWeight="bold"
-color="white"
->
-
-Openserve Contract Fibre
-
-</Typography>
-
-<Typography
-textAlign="center"
-color="#CBD5E1"
-mt={2}
->
-
-Business & Residential Fibre
-Applications
-
-</Typography>
-
-<Divider
-sx={{
-my:4,
-borderColor:"rgba(255,255,255,.12)"
-}}
-/>
-
-<Grid container spacing={2}>
-
-<Grid item xs={6}>
-
-<Card sx={glassCard}>
-
-<CardContent>
-
-<Speed
-color="primary"
-sx={{fontSize:45}}
-/>
-
-<Typography fontWeight="bold">
-
-1Gbps
-
-</Typography>
-
-<Typography variant="body2">
-
-Ultra Speed
-
-</Typography>
-
-</CardContent>
-
-</Card>
-
-</Grid>
-
-<Grid item xs={6}>
-
-<Card sx={glassCard}>
-
-<CardContent>
-
-<Public
-color="success"
-sx={{fontSize:45}}
-/>
-
-<Typography fontWeight="bold">
-
-National
-
-</Typography>
-
-<Typography variant="body2">
-
-Coverage
-
-</Typography>
-
-</CardContent>
-
-</Card>
-
-</Grid>
-
-<Grid item xs={6}>
-
-<Card sx={glassCard}>
-
-<CardContent>
-
-<Star
-sx={{
-fontSize:45,
-color:"#f59e0b"
-}}
-/>
-
-<Typography fontWeight="bold">
-
-Priority
-
-</Typography>
-
-<Typography variant="body2">
-
-Support
-
-</Typography>
-
-</CardContent>
-
-</Card>
-
-</Grid>
-
-<Grid item xs={6}>
-
-<Card sx={glassCard}>
-
-<CardContent>
-
-<TrendingUp
-color="secondary"
-sx={{fontSize:45}}
-/>
-
-<Typography fontWeight="bold">
-
-99.9%
-
-</Typography>
-
-<Typography variant="body2">
-
-Uptime
-
-</Typography>
-
-</CardContent>
-
-</Card>
-
-</Grid>
-
-</Grid>
-
-</MotionPaper>
-
-</Grid>
-
-</Grid>
-
-{/* ============================
-          APPLICATION FORM
-============================= */}
-
-<MotionPaper
-variants={fadeUp}
-initial="hidden"
-whileInView="visible"
-viewport={{ once: true }}
-sx={{
-mt:8,
-p:5,
-borderRadius:8,
-background:"rgba(255,255,255,.08)",
-backdropFilter:"blur(25px)",
-border:"1px solid rgba(255,255,255,.12)"
-}}
->
-
-<Typography
-variant="h4"
-fontWeight="bold"
-color="white"
-mb={1}
->
-
-Apply For Openserve Contract Fibre
-
-</Typography>
-
-<Typography
-color="#CBD5E1"
-mb={5}
->
-
-Complete the application below and our fibre consultants will contact you within 24 hours.
-
-</Typography>
-
-<Grid container spacing={3}>
-
-<Grid item xs={12} md={6}>
-<TextField
-fullWidth
-label="First Name"
-value={lead.customerName}
-onChange={(e)=>
-setLead({
-...lead,
-customerName:e.target.value
-})
-}
-InputProps={{
-startAdornment:(
-<InputAdornment position="start">
-<Person color="primary"/>
-</InputAdornment>
-)
-}}
-/>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<TextField
-fullWidth
-label="Surname"
-value={lead.surname}
-onChange={(e)=>
-setLead({
-...lead,
-surname:e.target.value
-})
-}
-/>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<TextField
-fullWidth
-label="ID Number"
-value={lead.idNumber}
-onChange={(e)=>
-setLead({
-...lead,
-idNumber:e.target.value
-})
-}
-/>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<TextField
-fullWidth
-label="Phone Number"
-value={lead.phone}
-onChange={(e)=>
-setLead({
-...lead,
-phone:e.target.value
-})
-}
-InputProps={{
-startAdornment:(
-<InputAdornment position="start">
-<Phone color="primary"/>
-</InputAdornment>
-)
-}}
-/>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<TextField
-fullWidth
-label="Alternative Phone"
-value={lead.alternativePhone}
-onChange={(e)=>
-setLead({
-...lead,
-alternativePhone:e.target.value
-})
-}
-/>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<TextField
-fullWidth
-label="Email Address"
-value={lead.email}
-onChange={(e)=>
-setLead({
-...lead,
-email:e.target.value
-})
-}
-InputProps={{
-startAdornment:(
-<InputAdornment position="start">
-<Email color="primary"/>
-</InputAdornment>
-)
-}}
-/>
-</Grid>
-
-<Grid item xs={12}>
-<TextField
-fullWidth
-label="Street Address"
-value={lead.address}
-onChange={(e)=>
-setLead({
-...lead,
-address:e.target.value
-})
-}
-InputProps={{
-startAdornment:(
-<InputAdornment position="start">
-<Home color="primary"/>
-</InputAdornment>
-)
-}}
-/>
-</Grid>
-
-<Grid item xs={12} md={4}>
-<TextField
-fullWidth
-label="Suburb"
-value={lead.suburb}
-onChange={(e)=>
-setLead({
-...lead,
-suburb:e.target.value
-})
-}
-/>
-</Grid>
-
-<Grid item xs={12} md={4}>
-<TextField
-fullWidth
-label="City"
-value={lead.city}
-onChange={(e)=>
-setLead({
-...lead,
-city:e.target.value
-})
-}
-/>
-</Grid>
-
-<Grid item xs={12} md={4}>
-<TextField
-select
-fullWidth
-label="Province"
-value={lead.province}
-onChange={(e)=>
-setLead({
-...lead,
-province:e.target.value
-})
-}
->
-
-{provinces.map((province)=>(
-<MenuItem
-key={province}
-value={province}
->
-{province}
-</MenuItem>
-))}
-
-</TextField>
-
-</Grid>
-
-<Grid item xs={12}>
-<TextField
-fullWidth
-label="GPS Location (Optional)"
-value={lead.gpsLocation}
-onChange={(e)=>
-setLead({
-...lead,
-gpsLocation:e.target.value
-})
-}
-InputProps={{
-startAdornment:(
-<InputAdornment position="start">
-<LocationOn color="primary"/>
-</InputAdornment>
-)
-}}
-/>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<TextField
-select
-fullWidth
-label="Choose Fibre Package"
-value={lead.packagePlan}
-onChange={(e)=>
-setLead({
-...lead,
-packagePlan:e.target.value
-})
-}
->
-
-{packages.map((pkg)=>(
-<MenuItem
-key={pkg}
-value={pkg}
->
-{pkg}
-</MenuItem>
-))}
-
-</TextField>
-
-</Grid>
-
-<Grid item xs={12} md={6}>
-<TextField
-select
-fullWidth
-label="Current ISP"
-value={lead.existingISP}
-onChange={(e)=>
-setLead({
-...lead,
-existingISP:e.target.value
-})
-}
->
-
-<MenuItem value="Afrihost">Afrihost</MenuItem>
-<MenuItem value="Cool Ideas">Cool Ideas</MenuItem>
-<MenuItem value="MWEB">MWEB</MenuItem>
-<MenuItem value="Vodacom">Vodacom</MenuItem>
-<MenuItem value="MTN">MTN</MenuItem>
-<MenuItem value="None">No Existing ISP</MenuItem>
-
-</TextField>
-
-</Grid>
-
-<Grid item xs={12} md={6}>
-<TextField
-type="date"
-fullWidth
-label="Preferred Installation Date"
-InputLabelProps={{ shrink: true }}
-value={lead.preferredInstallationDate}
-onChange={(e)=>
-setLead({
-...lead,
-preferredInstallationDate:e.target.value
-})
-}
-/>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<TextField
-select
-fullWidth
-label="Preferred Installation Time"
-value={lead.preferredTime}
-onChange={(e)=>
-setLead({
-...lead,
-preferredTime:e.target.value
-})
-}
->
-<MenuItem value="08:00 - 10:00">08:00 - 10:00</MenuItem>
-<MenuItem value="10:00 - 12:00">10:00 - 12:00</MenuItem>
-<MenuItem value="12:00 - 14:00">12:00 - 14:00</MenuItem>
-<MenuItem value="14:00 - 16:00">14:00 - 16:00</MenuItem>
-<MenuItem value="16:00 - 18:00">16:00 - 18:00</MenuItem>
-</TextField>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<TextField
-select
-fullWidth
-label="Preferred Sales Agent"
-value={lead.agentName}
-onChange={(e)=>
-setLead({
-...lead,
-agentName:e.target.value
-})
-}
->
-
-<MenuItem value="">Select Agent</MenuItem>
-
-{agents.map((agent:any)=>(
-<MenuItem
-key={agent.id}
-value={agent.fullName}
->
-{agent.fullName}
-</MenuItem>
-))}
-
-</TextField>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<TextField
-select
-fullWidth
-label="Network Provider"
-value={lead.provider}
-onChange={(e)=>
-setLead({
-...lead,
-provider:e.target.value
-})
-}
->
-
-{providers.map((provider)=>(
-<MenuItem
-key={provider}
-value={provider}
->
-{provider}
-</MenuItem>
-))}
-
-</TextField>
-</Grid>
-
-<Grid item xs={12}>
-<TextField
-fullWidth
-multiline
-rows={5}
-label="Additional Notes"
-placeholder="Access instructions, landmarks, estate name, gate code, preferred communication method..."
-value={lead.notes}
-onChange={(e)=>
-setLead({
-...lead,
-notes:e.target.value
-})
-}
-/>
-</Grid>
-
-<Grid item xs={12}>
-
-<Paper
-sx={{
-p:3,
-borderRadius:4,
-background:"rgba(37,99,235,.08)",
-border:"1px solid rgba(37,99,235,.25)"
-}}
->
-
-<Typography
-fontWeight="bold"
-color="primary"
-mb={2}
->
-
-Contract Fibre Benefits
-
-</Typography>
-
-<Grid container spacing={2}>
-
-<Grid item xs={12} md={6}>
-<Box display="flex" gap={1}>
-<CheckCircle color="success"/>
-<Typography>
-Professional Openserve Installation
-</Typography>
-</Box>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<Box display="flex" gap={1}>
-<CheckCircle color="success"/>
-<Typography>
-Unlimited High-Speed Internet
-</Typography>
-</Box>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<Box display="flex" gap={1}>
-<CheckCircle color="success"/>
-<Typography>
-Priority Technical Support
-</Typography>
-</Box>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<Box display="flex" gap={1}>
-<CheckCircle color="success"/>
-<Typography>
-Professional Wi-Fi Router Included
-</Typography>
-</Box>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<Box display="flex" gap={1}>
-<CheckCircle color="success"/>
-<Typography>
-Nationwide Openserve Coverage
-</Typography>
-</Box>
-</Grid>
-
-<Grid item xs={12} md={6}>
-<Box display="flex" gap={1}>
-<CheckCircle color="success"/>
-<Typography>
-Fast Installation Scheduling
-</Typography>
-</Box>
-</Grid>
-
-</Grid>
-
-</Paper>
-
-</Grid>
-
-<Grid item xs={12}>
-
-<MotionBox
-whileHover={{
-scale:1.03
-}}
-whileTap={{
-scale:.97
-}}
->
-
-<Button
-fullWidth
-size="large"
-variant="contained"
-disabled={loading}
-onClick={async()=>{
+const submitApplication=async()=>{
 
 setLoading(true);
 
 try{
 
-const newLead=push(ref(db,"contractFibreLeads"));
+await push(
 
-await set(newLead,{
-...lead,
-createdAt:serverTimestamp(),
-status:"Pending",
-adminConfirmation:"Pending"
+ref(db,"contractFibreLeads"),
+
+form
+
+);
+
+setSuccess(true);
+
+setForm({
+
+firstName:"",
+lastName:"",
+phone:"",
+email:"",
+idNumber:"",
+address:"",
+suburb:"",
+city:"",
+province:"",
+postalCode:"",
+packageName:"",
+monthlyPrice:"",
+agentName:"",
+notes:"",
+createdAt:new Date().toISOString(),
+status:"Pending"
+
 });
-
-alert("Application submitted successfully!");
-
-setLead(emptyLead);
 
 }catch(error){
 
-alert("Failed to submit application.");
+console.log(error);
 
 }
 
 setLoading(false);
 
-}}
-sx={{
-py:2,
+};
+
+const styles={
+
+page:{
+
+minHeight:"100vh",
+
+position:"relative",
+
+overflow:"hidden",
+
+background:
+"linear-gradient(135deg,#dbeafe,#f8fbff,#eef7ff)",
+
+padding:"50px 20px"
+
+},
+
+background:{
+
+position:"absolute",
+
+top:0,
+
+left:0,
+
+right:0,
+
+bottom:0,
+
+overflow:"hidden",
+
+zIndex:0
+
+},
+
+glass:{
+
+position:"relative",
+
+zIndex:5,
+
+maxWidth:1250,
+
+margin:"0 auto",
+
+borderRadius:"35px",
+
+background:"rgba(255,255,255,.95)",
+
+backdropFilter:"blur(30px)",
+
+boxShadow:"0 30px 80px rgba(0,0,0,.12)",
+
+padding:5
+
+},
+
+input:{
+
+"& .MuiOutlinedInput-root":{
+
+borderRadius:"18px",
+
+background:"#ffffff",
+
+transition:".35s",
+
+"& fieldset":{
+
+borderColor:"#dbeafe"
+
+},
+
+"&:hover fieldset":{
+
+borderColor:"#0ea5e9"
+
+},
+
+"&.Mui-focused fieldset":{
+
+borderWidth:2,
+
+borderColor:"#2563eb"
+
+}
+
+}
+
+},
+
+submitButton:{
+
+height:60,
+
+fontWeight:800,
+
 fontSize:18,
-fontWeight:"bold",
-borderRadius:100,
-background:"linear-gradient(90deg,#2563eb,#06b6d4,#22c55e)",
-boxShadow:"0 20px 45px rgba(37,99,235,.35)"
-}}
->
 
-{loading
-? "Submitting..."
-: "Submit Contract Fibre Application"}
+borderRadius:"18px",
 
-</Button>
+background:
+"linear-gradient(90deg,#2563eb,#0ea5e9)",
 
-</MotionBox>
+textTransform:"none",
 
-</Grid>
+boxShadow:"0 20px 40px rgba(37,99,235,.35)",
 
-</Grid>
+"&:hover":{
 
-</MotionPaper>
+background:
+"linear-gradient(90deg,#1d4ed8,#0284c7)"
 
-{/* =====================================
-        PREMIUM CONTACT SECTION
-===================================== */}
-
-<MotionBox
-variants={fadeUp}
-initial="hidden"
-whileInView="visible"
-viewport={{ once: true }}
-sx={{ mt: 8 }}
->
-
-<Grid container spacing={4}>
-
-<Grid item xs={12} md={4}>
-
-<Paper
-sx={{
-p:4,
-height:"100%",
-borderRadius:6,
-background:"rgba(255,255,255,.08)",
-backdropFilter:"blur(25px)",
-border:"1px solid rgba(255,255,255,.12)",
-textAlign:"center"
-}}
->
-
-<Phone
-sx={{
-fontSize:55,
-color:"#38bdf8",
-mb:2
-}}
-/>
-
-<Typography variant="h6" fontWeight="bold" color="white">
-
-Call Us
-
-</Typography>
-
-<Typography color="#CBD5E1">
-
-+27 685932102
-
-</Typography>
-
-</Paper>
-
-</Grid>
-
-<Grid item xs={12} md={4}>
-
-<Paper
-sx={{
-p:4,
-height:"100%",
-borderRadius:6,
-background:"rgba(255,255,255,.08)",
-backdropFilter:"blur(25px)",
-border:"1px solid rgba(255,255,255,.12)",
-textAlign:"center"
-}}
->
-
-<Email
-sx={{
-fontSize:55,
-color:"#22c55e",
-mb:2
-}}
-/>
-
-<Typography variant="h6" fontWeight="bold" color="white">
-
-Email Support
-
-</Typography>
-
-<Typography color="#CBD5E1">
-
-leo@miyfi.co.za
-
-</Typography>
-
-</Paper>
-
-</Grid>
-
-<Grid item xs={12} md={4}>
-
-<Paper
-sx={{
-p:4,
-height:"100%",
-borderRadius:6,
-background:"rgba(255,255,255,.08)",
-backdropFilter:"blur(25px)",
-border:"1px solid rgba(255,255,255,.12)",
-textAlign:"center"
-}}
->
-
-<LocationOn
-sx={{
-fontSize:55,
-color:"#f59e0b",
-mb:2
-}}
-/>
-
-<Typography variant="h6" fontWeight="bold" color="white">
-
-Coverage
-
-</Typography>
-
-<Typography color="#CBD5E1">
-
-Available Across South Africa
-
-</Typography>
-
-</Paper>
-
-</Grid>
-
-</Grid>
-
-</MotionBox>
-
-{/* =====================================
-            TRUST SECTION
-===================================== */}
-
-<Box
-sx={{
-mt:8,
-mb:8,
-textAlign:"center"
-}}
->
-
-<Typography
-variant="h3"
-fontWeight="bold"
-color="white"
->
-
-Why Choose Openserve Fibre?
-
-</Typography>
-
-<Typography
-color="#CBD5E1"
-mt={2}
-mb={6}
->
-
-Trusted by thousands of South African homes and businesses.
-
-</Typography>
-
-<Grid container spacing={4}>
-
-{[
-{
-title:"99.9% Uptime",
-icon:<Verified sx={{fontSize:60,color:"#22c55e"}}/>
-},
-{
-title:"Ultra Fast Speeds",
-icon:<Speed sx={{fontSize:60,color:"#38bdf8"}}/>
-},
-{
-title:"Professional Installation",
-icon:<Engineering sx={{fontSize:60,color:"#f59e0b"}}/>
-},
-{
-title:"24/7 Support",
-icon:<SupportAgent sx={{fontSize:60,color:"#a855f7"}}/>
 }
-].map((item,index)=>(
 
-<Grid item xs={12} sm={6} md={3} key={index}>
+}
 
-<MotionPaper
+};
 
-whileHover={{
-scale:1.08,
-y:-10
+
+return (
+
+<Box sx={styles.page}>
+
+{/* ================================
+        FLOATING BACKGROUND
+================================ */}
+
+<Box sx={styles.background}>
+
+<motion.div
+animate={{
+x:[0,120,0],
+y:[0,-80,0],
+scale:[1,1.15,1]
 }}
-
 transition={{
-duration:.3
+duration:18,
+repeat:Infinity
 }}
-
-sx={{
-p:4,
-height:"100%",
-borderRadius:6,
-background:"rgba(255,255,255,.08)",
-backdropFilter:"blur(25px)",
-border:"1px solid rgba(255,255,255,.12)",
-textAlign:"center"
+style={{
+position:"absolute",
+width:420,
+height:420,
+borderRadius:"50%",
+background:"rgba(37,99,235,.18)",
+filter:"blur(120px)",
+top:-120,
+left:-120
 }}
->
+/>
 
-{item.icon}
+<motion.div
+animate={{
+x:[0,-120,0],
+y:[0,100,0],
+scale:[1,1.25,1]
+}}
+transition={{
+duration:22,
+repeat:Infinity
+}}
+style={{
+position:"absolute",
+width:380,
+height:380,
+borderRadius:"50%",
+background:"rgba(14,165,233,.15)",
+filter:"blur(120px)",
+top:80,
+right:-100
+}}
+/>
 
-<Typography
-fontWeight="bold"
-color="white"
-mt={2}
->
-
-{item.title}
-
-</Typography>
-
-</MotionPaper>
-
-</Grid>
-
-))
-
-}
-
-</Grid>
+<motion.div
+animate={{
+x:[0,80,0],
+y:[0,-120,0],
+rotate:[0,180,360]
+}}
+transition={{
+duration:28,
+repeat:Infinity
+}}
+style={{
+position:"absolute",
+width:500,
+height:500,
+borderRadius:"50%",
+background:"rgba(255,255,255,.18)",
+filter:"blur(150px)",
+bottom:-180,
+left:"35%"
+}}
+/>
 
 </Box>
 
-
-
 {/* =====================================
-            FOOTER
+              MAIN CONTAINER
 ===================================== */}
 
-<Box
-  sx={{
-    py: 5,
-    textAlign: "center",
-    borderTop: "1px solid rgba(255,255,255,.12)"
-  }}
+<MotionPaper
+
+sx={styles.glass}
+
+initial={{opacity:0,y:60}}
+
+animate={{opacity:1,y:0}}
+
+transition={{duration:1}}
+
 >
+
+{/* =====================================
+                  HERO
+===================================== */}
+
+<Grid
+container
+spacing={5}
+alignItems="center"
+mb={6}
+>
+
+<Grid item xs={12} md={8}>
+
+<MotionTypography
+
+variant="h3"
+
+fontWeight={900}
+
+color="#0f172a"
+
+animate={{
+
+x:[0,25,0]
+
+}}
+
+transition={{
+
+duration:7,
+
+repeat:Infinity
+
+}}
+
+>
+
+OpenServe Contract Fibre
+
+</MotionTypography>
+
+<MotionTypography
+
+mt={2}
+
+fontSize={20}
+
+lineHeight={1.9}
+
+color="#475569"
+
+animate={{
+
+y:[0,-10,0]
+
+}}
+
+transition={{
+
+duration:6,
+
+repeat:Infinity
+
+}}
+
+>
+
+Experience South Africa's next-generation fibre
+network with lightning-fast internet,
+professional installation,
+secure connectivity and reliable service
+for homes and businesses.
+
+</MotionTypography>
+
+<Box
+
+display="flex"
+
+gap={2}
+
+mt={4}
+
+flexWrap="wrap"
+
+>
+
+<Chip
+
+icon={<Verified/>}
+
+label="OpenServe Certified"
+
+color="primary"
+
+/>
+
+<Chip
+
+icon={<Bolt/>}
+
+label="Ultra Fast Fibre"
+
+color="success"
+
+/>
+
+<Chip
+
+icon={<Security/>}
+
+label="Secure Connection"
+
+color="secondary"
+
+/>
+
+<Chip
+
+icon={<RocketLaunch/>}
+
+label="2026 Smart Installation"
+
+color="warning"
+
+/>
+
+</Box>
+
+</Grid>
+
+<Grid item xs={12} md={4}>
+
+<MotionBox
+
+display="flex"
+
+justifyContent="center"
+
+animate={{
+
+y:[0,-25,0]
+
+}}
+
+transition={{
+
+duration:5,
+
+repeat:Infinity
+
+}}
+
+>
+
+<Avatar
+
+sx={{
+
+width:240,
+
+height:240,
+
+background:
+"linear-gradient(135deg,#2563eb,#38bdf8)",
+
+boxShadow:
+"0 30px 60px rgba(37,99,235,.35)"
+
+}}
+
+>
+
+<Wifi
+
+sx={{
+
+fontSize:120,
+
+color:"#fff"
+
+}}
+
+/>
+
+</Avatar>
+
+</MotionBox>
+
+</Grid>
+
+</Grid>
+
+<Divider sx={{mb:5}}/>
+
+{/* =====================================
+          APPLICATION FORM STARTS
+===================================== */}
+
+<Grid container spacing={3}>
+
+  {/* ===========================
+        PERSONAL DETAILS
+=========================== */}
+
+<Grid item xs={12}>
   <Typography
     variant="h5"
-    fontWeight="bold"
-    color="white"
+    fontWeight={800}
+    color="#0f172a"
+    mb={1}
+  >
+    Personal Information
+  </Typography>
+
+  <Typography
+    color="text.secondary"
+    mb={2}
+  >
+    Complete your details below to submit your
+    OpenServe Contract Fibre application.
+  </Typography>
+</Grid>
+
+<Grid item xs={12} md={6}>
+  <TextField
+    fullWidth
+    label="First Name"
+    name="firstName"
+    value={form.firstName}
+    onChange={handleChange}
+    sx={styles.input}
+    InputProps={{
+      startAdornment:(
+        <InputAdornment position="start">
+          <Person color="primary"/>
+        </InputAdornment>
+      )
+    }}
+  />
+</Grid>
+
+<Grid item xs={12} md={6}>
+  <TextField
+    fullWidth
+    label="Last Name"
+    name="lastName"
+    value={form.lastName}
+    onChange={handleChange}
+    sx={styles.input}
+    InputProps={{
+      startAdornment:(
+        <InputAdornment position="start">
+          <Person color="primary"/>
+        </InputAdornment>
+      )
+    }}
+  />
+</Grid>
+
+<Grid item xs={12} md={6}>
+  <TextField
+    fullWidth
+    label="South African ID Number"
+    name="idNumber"
+    value={form.idNumber}
+    onChange={handleChange}
+    sx={styles.input}
+    InputProps={{
+      startAdornment:(
+        <InputAdornment position="start">
+          <Badge color="primary"/>
+        </InputAdornment>
+      )
+    }}
+  />
+</Grid>
+
+<Grid item xs={12} md={6}>
+  <TextField
+    fullWidth
+    label="Cellphone Number"
+    name="phone"
+    value={form.phone}
+    onChange={handleChange}
+    sx={styles.input}
+    InputProps={{
+      startAdornment:(
+        <InputAdornment position="start">
+          <Phone color="primary"/>
+        </InputAdornment>
+      )
+    }}
+  />
+</Grid>
+
+<Grid item xs={12}>
+  <TextField
+    fullWidth
+    label="Email Address"
+    name="email"
+    value={form.email}
+    onChange={handleChange}
+    sx={styles.input}
+    InputProps={{
+      startAdornment:(
+        <InputAdornment position="start">
+          <Email color="primary"/>
+        </InputAdornment>
+      )
+    }}
+  />
+</Grid>
+
+{/* ===========================
+          INSTALLATION ADDRESS
+=========================== */}
+
+<Grid item xs={12}>
+  <Divider sx={{my:2}}/>
+
+  <Typography
+    variant="h5"
+    fontWeight={800}
+    color="#0f172a"
+    mb={2}
+  >
+    Installation Address
+  </Typography>
+</Grid>
+
+<Grid item xs={12}>
+  <TextField
+    fullWidth
+    label="Street Address"
+    name="address"
+    value={form.address}
+    onChange={handleChange}
+    sx={styles.input}
+    InputProps={{
+      startAdornment:(
+        <InputAdornment position="start">
+          <Home color="primary"/>
+        </InputAdornment>
+      )
+    }}
+  />
+</Grid>
+
+<Grid item xs={12} md={4}>
+  <TextField
+    fullWidth
+    label="Suburb"
+    name="suburb"
+    value={form.suburb}
+    onChange={handleChange}
+    sx={styles.input}
+  />
+</Grid>
+
+<Grid item xs={12} md={4}>
+  <TextField
+    fullWidth
+    label="City / Town"
+    name="city"
+    value={form.city}
+    onChange={handleChange}
+    sx={styles.input}
+    InputProps={{
+      startAdornment:(
+        <InputAdornment position="start">
+          <Apartment color="primary"/>
+        </InputAdornment>
+      )
+    }}
+  />
+</Grid>
+
+<Grid item xs={12} md={4}>
+  <TextField
+    fullWidth
+    label="Postal Code"
+    name="postalCode"
+    value={form.postalCode}
+    onChange={handleChange}
+    sx={styles.input}
+  />
+</Grid>
+
+<Grid item xs={12} md={6}>
+  <TextField
+    select
+    fullWidth
+    label="Province"
+    name="province"
+    value={form.province}
+    onChange={handleChange}
+    sx={styles.input}
+  >
+    <MenuItem value="Gauteng">Gauteng</MenuItem>
+    <MenuItem value="Limpopo">Limpopo</MenuItem>
+    <MenuItem value="Mpumalanga">Mpumalanga</MenuItem>
+    <MenuItem value="Free State">Free State</MenuItem>
+    <MenuItem value="KwaZulu-Natal">KwaZulu-Natal</MenuItem>
+    <MenuItem value="North West">North West</MenuItem>
+    <MenuItem value="Northern Cape">Northern Cape</MenuItem>
+    <MenuItem value="Western Cape">Western Cape</MenuItem>
+    <MenuItem value="Eastern Cape">Eastern Cape</MenuItem>
+  </TextField>
+</Grid>
+
+<Grid item xs={12} md={6}>
+  <MotionBox
+    animate={{
+      x:[0,20,0]
+    }}
+    transition={{
+      duration:6,
+      repeat:Infinity
+    }}
+    sx={{
+      height:"100%",
+      display:"flex",
+      justifyContent:"center",
+      alignItems:"center"
+    }}
+  >
+    <Avatar
+      sx={{
+        width:140,
+        height:140,
+        background:"linear-gradient(135deg,#0ea5e9,#2563eb)"
+      }}
+    >
+      <Public sx={{fontSize:70}}/>
+    </Avatar>
+  </MotionBox>
+</Grid>
+
+{/* ===========================
+          FIBRE PACKAGE
+=========================== */}
+
+<Grid item xs={12}>
+  <Divider sx={{ my:4 }}/>
+
+  <Typography
+    variant="h5"
+    fontWeight={800}
+    color="#0f172a"
+    mb={2}
+  >
+    Choose Your Fibre Package
+  </Typography>
+</Grid>
+
+<Grid item xs={12} md={6}>
+  <TextField
+    select
+    fullWidth
+    label="OpenServe Fibre Package"
+    name="packageName"
+    value={form.packageName}
+    onChange={(e)=>{
+
+      const selected=packagePlans.find(
+        p=>p.name===e.target.value
+      );
+
+      setForm(prev=>({
+
+        ...prev,
+
+        packageName:e.target.value,
+
+        monthlyPrice:selected?.price || ""
+
+      }));
+
+    }}
+    sx={styles.input}
+    InputProps={{
+      startAdornment:(
+        <InputAdornment position="start">
+          <Wifi color="primary"/>
+        </InputAdornment>
+      )
+    }}
+  >
+
+    {packagePlans.map((item)=>(
+
+      <MenuItem
+        key={item.name}
+        value={item.name}
+      >
+
+        {item.name} • {item.price}/Month
+
+      </MenuItem>
+
+    ))}
+
+  </TextField>
+</Grid>
+
+<Grid item xs={12} md={6}>
+  <TextField
+    fullWidth
+    label="Monthly Price"
+    value={form.monthlyPrice}
+    InputProps={{
+      readOnly:true
+    }}
+    sx={styles.input}
+  />
+</Grid>
+
+<Grid item xs={12}>
+  <TextField
+    fullWidth
+    multiline
+    rows={5}
+    label="Additional Notes (Optional)"
+    name="notes"
+    value={form.notes}
+    onChange={handleChange}
+    sx={styles.input}
+  />
+</Grid>
+
+{/* ===========================
+        INFORMATION CARD
+=========================== */}
+
+<Grid item xs={12}>
+
+  <MotionPaper
+
+    elevation={0}
+
+    animate={{
+      y:[0,-12,0]
+    }}
+
+    transition={{
+      duration:5,
+      repeat:Infinity
+    }}
+
+    sx={{
+
+      mt:3,
+
+      p:4,
+
+      borderRadius:"25px",
+
+      background:
+      "linear-gradient(135deg,#eff6ff,#ffffff)",
+
+      border:"1px solid #dbeafe"
+
+    }}
+
+  >
+
+    <Typography
+      variant="h5"
+      fontWeight={800}
+      mb={2}
+    >
+
+      Why Choose OpenServe?
+
+    </Typography>
+
+    <Grid container spacing={3}>
+
+      <Grid item xs={12} md={3}>
+
+        <Chip
+
+          icon={<Bolt/>}
+
+          label="Ultra Fast Fibre"
+
+          color="primary"
+
+          sx={{
+            width:"100%",
+            height:55,
+            fontWeight:700
+          }}
+
+        />
+
+      </Grid>
+
+      <Grid item xs={12} md={3}>
+
+        <Chip
+
+          icon={<Security/>}
+
+          label="Secure Network"
+
+          color="success"
+
+          sx={{
+            width:"100%",
+            height:55,
+            fontWeight:700
+          }}
+
+        />
+
+      </Grid>
+
+      <Grid item xs={12} md={3}>
+
+        <Chip
+
+          icon={<RocketLaunch/>}
+
+          label="Quick Installation"
+
+          color="secondary"
+
+          sx={{
+            width:"100%",
+            height:55,
+            fontWeight:700
+          }}
+
+        />
+
+      </Grid>
+
+      <Grid item xs={12} md={3}>
+
+        <Chip
+
+          icon={<Verified/>}
+
+          label="Trusted Since 2026"
+
+          color="warning"
+
+          sx={{
+            width:"100%",
+            height:55,
+            fontWeight:700
+          }}
+
+        />
+
+      </Grid>
+
+    </Grid>
+
+  </MotionPaper>
+
+</Grid>
+
+{/* ===========================
+        SUBMIT BUTTON
+=========================== */}
+
+<Grid item xs={12}>
+
+  <MotionBox
+
+    mt={5}
+
+    display="flex"
+
+    justifyContent="center"
+
+    animate={{
+      scale:[1,1.03,1]
+    }}
+
+    transition={{
+      duration:3,
+      repeat:Infinity
+    }}
+
+  >
+
+    <Button
+
+      size="large"
+
+      variant="contained"
+
+      endIcon={
+        loading
+        ?
+        <CircularProgress
+          size={24}
+          color="inherit"
+        />
+        :
+        <Send/>
+      }
+
+      disabled={loading}
+
+      sx={styles.submitButton}
+
+      onClick={submitApplication}
+
+    >
+
+      {loading
+      ?
+      "Submitting Application..."
+      :
+      "Submit Fibre Application"}
+
+    </Button>
+
+  </MotionBox>
+
+</Grid>
+
+</Grid>
+
+</MotionPaper>
+
+{/* ===========================
+          SUCCESS MESSAGE
+=========================== */}
+
+<Snackbar
+  open={success}
+  autoHideDuration={5000}
+  onClose={() => setSuccess(false)}
+  anchorOrigin={{
+    vertical: "top",
+    horizontal: "center"
+  }}
+>
+  <Alert
+    severity="success"
+    variant="filled"
+    sx={{
+      width: "100%",
+      borderRadius: "18px",
+      fontWeight: 700,
+      fontSize: 16
+    }}
+  >
+    🎉 Your OpenServe Fibre application has been submitted successfully.
+    Our team will contact you shortly.
+  </Alert>
+</Snackbar>
+
+{/* ===========================
+              FOOTER
+=========================== */}
+
+<Box
+  mt={8}
+  textAlign="center"
+>
+
+  <motion.div
+    animate={{
+      y: [0, -8, 0]
+    }}
+    transition={{
+      duration: 4,
+      repeat: Infinity
+    }}
+  >
+
+    <Avatar
+      sx={{
+        width: 90,
+        height: 90,
+        mx: "auto",
+        mb: 2,
+        background:
+          "linear-gradient(135deg,#2563eb,#38bdf8)",
+        boxShadow:
+          "0 20px 50px rgba(37,99,235,.35)"
+      }}
+    >
+      <Wifi sx={{ fontSize: 45 }} />
+    </Avatar>
+
+  </motion.div>
+
+  <Typography
+    variant="h5"
+    fontWeight={800}
+    color="#0f172a"
   >
     OpenServe Contract Fibre
   </Typography>
 
   <Typography
-    color="#CBD5E1"
-    mt={2}
-
+    mt={1}
+    color="text.secondary"
   >
-    Experience next-generation fibre connectivity with reliable speeds,
-    professional installations and exceptional customer service.
+    Fast • Reliable • Professional • Secure
+  </Typography>
+
+  <Divider sx={{ my:4 }} />
+
+  <Grid
+    container
+    spacing={3}
+    justifyContent="center"
+  >
+
+    <Grid item>
+
+      <Stack
+        direction="row"
+        spacing={1}
+        alignItems="center"
+      >
+        <Phone color="primary"/>
+        <Typography>
+          087 000 0000
+        </Typography>
+      </Stack>
+
+    </Grid>
+
+    <Grid item>
+
+      <Stack
+        direction="row"
+        spacing={1}
+        alignItems="center"
+      >
+        <Email color="primary"/>
+        <Typography>
+          info@openserve.co.za
+        </Typography>
+      </Stack>
+
+    </Grid>
+
+    <Grid item>
+
+      <Stack
+        direction="row"
+        spacing={1}
+        alignItems="center"
+      >
+        <Language color="primary"/>
+        <Typography>
+          www.openserve.co.za
+        </Typography>
+      </Stack>
+
+    </Grid>
+
+  </Grid>
+
+  <Typography
+    mt={5}
+    color="text.secondary"
+  >
+    © 2026 OpenServe Contract Fibre Application Portal
   </Typography>
 
   <Typography
-    color="#94A3B8"
-    mt={4}
+    color="text.secondary"
+    mb={3}
   >
-    © 2026 OpenServe Fibre Applications. All Rights Reserved.
+    Designed with ❤️ for a smarter South Africa.
   </Typography>
 
 </Box>
 
-{/* Close the main content Box */}
-</Box>
+
 </Box>
 
 );
@@ -1508,17 +1272,3 @@ mt={2}
 };
 
 export default ContractFibreLeads;
-
-
-/* =====================================
-                STYLES
-===================================== */
-
-const glassCard = {
-background:"rgba(255,255,255,.08)",
-backdropFilter:"blur(25px)",
-border:"1px solid rgba(255,255,255,.12)",
-borderRadius:5,
-textAlign:"center",
-height:"100%"
-};
