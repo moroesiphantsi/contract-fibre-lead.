@@ -531,80 +531,9 @@ repeat:Infinity
 
 >
 
-Experience South Africa's next-generation OpenServe Fibre network
-with ultra-fast speeds, enterprise-grade reliability,
-AI-powered connectivity and professional installation
-designed for homes and businesses in 2026.
+Please Complete The Following Form!
 
 </MotionTypography>
-
-<Stack
-
-direction="row"
-
-spacing={2}
-
-flexWrap="wrap"
-
-mt={5}
-
->
-
-<Chip
-
-icon={<Verified/>}
-
-label="OpenServe Certified"
-
-sx={{
-background:"#ffffff",
-fontWeight:700
-}}
-
-/>
-
-<Chip
-
-icon={<FlashOn/>}
-
-
-label="Lightning Fast"
-
-sx={{
-background:"#E3F2FD",
-fontWeight:700
-}}
-
-/>
-
-<Chip
-
-icon={<CloudDone/>}
-
-label="99.9% Reliable"
-
-sx={{
-background:"#ffffff",
-fontWeight:700
-}}
-
-/>
-
-<Chip
-
-
-icon={<Stars/>}
-
-label="2026 Premium Network"
-
-sx={{
-background:"#FFF8E1",
-fontWeight:700
-}}
-
-/>
-
-</Stack>
 
 </Grid>
 
