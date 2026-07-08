@@ -31,10 +31,7 @@ import {
   RocketLaunch,
   Public,
   Apartment,
-  Verified,
-  FlashOn,
-  CloudDone,
-  Stars
+  Verified
 } from "@mui/icons-material";
 
 import { motion } from "framer-motion";
