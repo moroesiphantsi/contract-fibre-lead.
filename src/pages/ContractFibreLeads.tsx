@@ -1343,6 +1343,80 @@ sx={styles.input}
 
 </Paper>
 
+
+<Box
+display="flex"
+justifyContent="center"
+
+mt={6}
+>
+
+<motion.div
+whileHover={{
+scale:1.05
+}}
+whileTap={{
+scale:.98
+}}
+animate={{
+y:[0,-8,0]
+}}
+transition={{
+duration:3,
+repeat:Infinity
+}}
+>
+
+<Button
+size="large"
+variant="contained"
+onClick={submitApplication}
+disabled={loading}
+
+endIcon={
+loading
+?
+<CircularProgress
+size={24}
+color="inherit"
+/>
+:
+<Send/>
+}
+sx={{
+height:68,
+minWidth:360,
+fontSize:20,
+fontWeight:900,
+borderRadius:"50px",
+textTransform:"none",
+background:
+"linear-gradient(90deg,#00C6FF,#0072FF)",
+boxShadow:
+"0 20px 50px rgba(0,150,255,.45)",
+"&:hover":{
+background:
+"linear-gradient(90deg,#0099FF,#005CFF)"
+
+}
+}}
+>
+
+{
+loading
+?
+"Submitting Application..."
+:
+"Submit OpenServe Fibre Application"
+}
+
+</Button>
+
+</motion.div>
+
+</Box>
+
+
 {/* ==========================================
         WHY CHOOSE OPENSERVE
 ========================================== */}
@@ -1835,78 +1909,6 @@ connecting thousands of homes nationwide.
 </Grid>
 
 </Grid>
-
-<Box
-display="flex"
-justifyContent="center"
-
-mt={6}
->
-
-<motion.div
-whileHover={{
-scale:1.05
-}}
-whileTap={{
-scale:.98
-}}
-animate={{
-y:[0,-8,0]
-}}
-transition={{
-duration:3,
-repeat:Infinity
-}}
->
-
-<Button
-size="large"
-variant="contained"
-onClick={submitApplication}
-disabled={loading}
-
-endIcon={
-loading
-?
-<CircularProgress
-size={24}
-color="inherit"
-/>
-:
-<Send/>
-}
-sx={{
-height:68,
-minWidth:360,
-fontSize:20,
-fontWeight:900,
-borderRadius:"50px",
-textTransform:"none",
-background:
-"linear-gradient(90deg,#00C6FF,#0072FF)",
-boxShadow:
-"0 20px 50px rgba(0,150,255,.45)",
-"&:hover":{
-background:
-"linear-gradient(90deg,#0099FF,#005CFF)"
-
-}
-}}
->
-
-{
-loading
-?
-"Submitting Application..."
-:
-"Submit OpenServe Fibre Application"
-}
-
-</Button>
-
-</motion.div>
-
-</Box>
 
 </Paper>
 
