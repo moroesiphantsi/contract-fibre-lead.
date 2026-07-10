@@ -51,6 +51,7 @@ const ContractFibreLeads = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showInsights, setshowInsights] = useState(false);
   
   const [form, setForm] = useState({
     title: "",
@@ -167,6 +168,7 @@ const ContractFibreLeads = () => {
       playCelebrationSound();
       setSuccess(true);
       setShowCelebration(true);
+      setshowInsights(true);
       setForm({
         title: "",
         firstName: "",
@@ -426,7 +428,7 @@ const ContractFibreLeads = () => {
              HIDDEN SECTIONS BELOW: ONLY RENDERED AFTER SUCCESSFUL SUBMISSION
            ========================================================= */}
         <AnimatePresence>
-          {success && (
+          {showInsights && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} transition={{ duration: 1 }}>
               
               {/* THE CONNECTION HUB COMPONENT */}
@@ -549,7 +551,18 @@ const ContractFibreLeads = () => {
           <Typography variant="body1" color="text.secondary" mb={3}>
             Your OpenServe Contract Fibre application has been processed effectively. Check below the form parameters to view newly unlocked coverage features!
           </Typography>
-          <Button variant="contained" onClick={() => setShowCelebration(false)} sx={{ borderRadius: "12px", px: 4, textTransform: "none", fontWeight: "bold" }}>
+          <Button 
+          variant="contained"
+          onClick={() => {
+          setShowCelebration(false);
+          setTimeout(() => {
+          window.scrollTo ({
+         top: document.body.scrollHeight, behavior: 'smooth'
+        });
+        }, 100);
+        }}
+          sx = {{borderRadius: "12px", px: 4, textTransform: "none", fontWeight: "bold" }}
+          >
             View Network Insights
           </Button>
         </DialogContent>
